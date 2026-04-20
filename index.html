@@ -875,18 +875,26 @@ function preprocessPlate(file) {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
-      // Scala a max 1200px largezza, mantieni proporzioni
-      const scale = Math.min(1, 1200 / img.width);
-      const w = Math.round(img.width * scale);
-      const h = Math.round(img.height * scale);
+      // Ritaglia la zona centrale (60% larghezza, fascia verticale 40%-80%)
+      // dove la targa è solitamente inquadrata
+      const cropX = Math.round(img.width  * 0.20);
+      const cropY = Math.round(img.height * 0.35);
+      const cropW = Math.round(img.width  * 0.60);
+      const cropH = Math.round(img.height * 0.45);
+
+      // Scala il ritaglio a max 1200px larghezza
+      const scale = Math.min(1, 1200 / cropW);
+      const w = Math.round(cropW * scale);
+      const h = Math.round(cropH * scale);
+
       const c = document.createElement('canvas');
       c.width = w; c.height = h;
       const ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-      // Aumenta contrasto: converti in scala di grigi con soglia
+      ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, w, h);
+
+      // Scala di grigi + contrasto
       const d = ctx.getImageData(0, 0, w, h);
       for (let i = 0; i < d.data.length; i += 4) {
-        // Contrasto forte prima della soglia
         let g = 0.299*d.data[i] + 0.587*d.data[i+1] + 0.114*d.data[i+2];
         g = Math.min(255, Math.max(0, (g - 128) * 1.8 + 128));
         const v = g > 140 ? 255 : 0;

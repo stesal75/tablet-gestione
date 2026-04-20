@@ -605,7 +605,12 @@
             </div>
             <div class="form-field">
               <label>Targa</label>
-              <input id="f-targa" type="text" placeholder="AB123CD" style="text-transform:uppercase">
+              <div style="display:flex;gap:6px">
+                <input id="f-targa" type="text" placeholder="AB123CD" style="text-transform:uppercase;flex:1">
+                <button type="button" id="btn-ocr" onclick="triggerCamera()" style="background:#1e3a5f;border:none;border-radius:8px;padding:0 12px;color:#93c5fd;font-size:20px;cursor:pointer;flex-shrink:0;touch-action:manipulation">📷</button>
+                <input type="file" id="ocr-input" accept="image/*" capture="environment" style="display:none" onchange="processOCR(this)">
+              </div>
+              <div id="ocr-status" style="font-size:11px;color:#64748b;margin-top:4px;min-height:16px"></div>
             </div>
           </div>
           <div class="form-actions">
@@ -661,11 +666,16 @@ function showForm(customer) {
 }
 
 function saveCustomer() {
-  const nome    = document.getElementById('f-nome').value.trim();
-  const cognome = document.getElementById('f-cognome').value.trim();
-  if (!nome && !cognome) {
-    document.getElementById('f-nome').classList.add('err');
-    setTimeout(() => document.getElementById('f-nome').classList.remove('err'), 900);
+  const nome     = document.getElementById('f-nome').value.trim();
+  const cognome  = document.getElementById('f-cognome').value.trim();
+  const telefono = document.getElementById('f-telefono').value.trim();
+  const targa    = document.getElementById('f-targa').value.trim();
+  if (!nome && !cognome && !telefono && !targa) {
+    ['f-telefono','f-targa'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.add('err');
+      setTimeout(() => el.classList.remove('err'), 900);
+    });
     return;
   }
   const data = {
@@ -749,6 +759,52 @@ function renderCustomerBar() {
   bar.innerHTML = fields.filter(f => f.val).map(f =>
     `<div class="cfield ${f.cls||''}"><label>${f.label}</label><span>${esc(f.val)}</span></div>`
   ).join('');
+}
+
+// ── OCR TARGA ──────────────────────────────────────────────────────
+function triggerCamera() {
+  document.getElementById('ocr-input').value = '';
+  document.getElementById('ocr-input').click();
+}
+
+function processOCR(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const status = document.getElementById('ocr-status');
+  const btn = document.getElementById('btn-ocr');
+  status.textContent = '⏳ Lettura targa…';
+  btn.disabled = true;
+
+  if (typeof Tesseract === 'undefined') {
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/tesseract.js@4/dist/tesseract.min.js';
+    s.onload = () => runOCR(file, status, btn);
+    document.head.appendChild(s);
+  } else {
+    runOCR(file, status, btn);
+  }
+}
+
+async function runOCR(file, status, btn) {
+  try {
+    const { data: { text } } = await Tesseract.recognize(file, 'eng', {
+      tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+    });
+    const cleaned = text.replace(/[^A-Z0-9]/g, '');
+    const match = cleaned.match(/[A-Z]{2}[0-9]{3,4}[A-Z]{2}/) || cleaned.match(/[A-Z0-9]{5,8}/);
+    if (match) {
+      document.getElementById('f-targa').value = match[0];
+      status.style.color = '#6ee7b7';
+      status.textContent = '✓ Targa rilevata: ' + match[0];
+    } else {
+      status.style.color = '#fbbf24';
+      status.textContent = '⚠ Non trovata — inserisci manualmente';
+    }
+  } catch(e) {
+    status.style.color = '#f87171';
+    status.textContent = '✗ Errore lettura immagine';
+  }
+  btn.disabled = false;
 }
 
 // chiudi modale cliccando fuori

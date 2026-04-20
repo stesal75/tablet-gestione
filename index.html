@@ -780,30 +780,52 @@ function processOCR(input) {
 
 async function runOCR(file, status, btn) {
   try {
-    status.textContent = '🔍 Lettura targa…';
+    status.style.color = '#64748b';
+    status.textContent = '🔍 Invio immagine…';
+    console.log('[OCR] file:', file.name, file.type, file.size, 'bytes');
+
     const formData = new FormData();
     formData.append('image', file);
+
     const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
     const fetchResult = fetch('https://api.api-ninjas.com/v1/imagetotext', {
       method: 'POST',
       headers: { 'X-Api-Key': 'H6ZcFuyNo6dPJr33DiEUvukAY7jaEg1sF49gDild' },
       body: formData,
-    }).then(r => r.json());
+    }).then(async r => {
+      console.log('[OCR] HTTP status:', r.status, r.statusText);
+      const raw = await r.text();
+      console.log('[OCR] risposta raw:', raw);
+      status.textContent = '📥 Risposta: ' + raw.slice(0, 120);
+      return JSON.parse(raw);
+    });
+
     const data = await Promise.race([fetchResult, timeout]);
-    const combined = (Array.isArray(data) ? data.map(d => d.text).join(' ') : '')
-      .replace(/[^A-Z0-9]/gi, '').toUpperCase();
-    const match = combined.match(/[A-Z]{2}[0-9]{3}[A-Z]{2}/);
+    console.log('[OCR] data parsed:', data);
+
+    const combined = (Array.isArray(data) ? data.map(d => d.text).join(' ') : String(data));
+    console.log('[OCR] testo estratto:', combined);
+
+    const cleaned = combined.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+    console.log('[OCR] cleaned:', cleaned);
+
+    const match = cleaned.match(/[A-Z]{2}[0-9]{3}[A-Z]{2}/);
+    console.log('[OCR] match targa:', match);
+
     if (match) {
       document.getElementById('f-targa').value = match[0];
       status.style.color = '#6ee7b7';
       status.textContent = '✓ ' + match[0];
     } else {
       status.style.color = '#fbbf24';
-      status.textContent = '⚠ Non rilevata — inserisci manualmente';
+      status.textContent = '⚠ Testo trovato ma nessuna targa — testo: ' + combined.slice(0, 60);
     }
   } catch(e) {
+    console.error('[OCR] errore:', e);
     status.style.color = '#f87171';
-    status.textContent = e.message === 'timeout' ? '✗ Timeout — inserisci manualmente' : '✗ Errore — inserisci manualmente';
+    status.textContent = e.message === 'timeout'
+      ? '✗ Timeout 15s'
+      : '✗ Errore: ' + e.message.slice(0, 60);
   }
   btn.disabled = false;
 }

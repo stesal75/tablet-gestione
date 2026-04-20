@@ -803,7 +803,16 @@ async function runOCR(file, status, btn) {
     const data = await Promise.race([fetchResult, timeout]);
     console.log('[OCR] data parsed:', data);
 
-    const combined = (Array.isArray(data) ? data.map(d => d.text).join(' ') : String(data));
+    console.log('[OCR] data type:', typeof data, 'isArray:', Array.isArray(data), 'keys:', data && typeof data === 'object' ? Object.keys(data) : 'n/a');
+
+    let combined = '';
+    if (Array.isArray(data)) {
+      combined = data.map(d => d.text || d.Text || JSON.stringify(d)).join(' ');
+    } else if (data && typeof data === 'object') {
+      combined = data.text || data.Text || data.result || data.words || JSON.stringify(data);
+    } else {
+      combined = String(data);
+    }
     console.log('[OCR] testo estratto:', combined);
 
     const cleaned = combined.replace(/[^A-Z0-9]/gi, '').toUpperCase();

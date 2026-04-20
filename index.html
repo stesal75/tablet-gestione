@@ -787,7 +787,7 @@ async function runOCR(file, status, btn) {
     status.textContent = '🔍 Invio a Google Vision…';
 
     const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
-    const fetchResult = fetch('https://vision.googleapis.com/v1/images:annotate?key=AIzaSyDYMwOdRDc9ho9AjeuZgnR7Hbud4Ivy69s', {
+    const fetchResult = fetch('https://vision.googleapis.com/v1/images:annotate?key=AIzaSyCtBZjpbJCi-FkLcMGxNSqGqsHp52N4_dk', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

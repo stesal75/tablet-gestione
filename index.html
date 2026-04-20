@@ -795,7 +795,8 @@ async function runOCR(file, status, btn) {
       }),
     }).then(async r => {
       const raw = await r.text();
-      console.log('[OCR] HTTP:', r.status, '— risposta:', raw.slice(0, 400));
+      console.log('[OCR] HTTP:', r.status, raw);
+      status.textContent = 'HTTP ' + r.status + ': ' + raw.slice(0, 200);
       return JSON.parse(raw);
     });
 

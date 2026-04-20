@@ -779,47 +779,20 @@ function processOCR(input) {
 }
 
 async function runOCR(file, status, btn) {
-  // 1) Prova API nativa TextDetector (Chrome Android/tablet — istantanea)
-  if ('TextDetector' in window) {
-    try {
-      status.textContent = '🔍 Analisi…';
-      const detector = new TextDetector();
-      const bitmap = await createImageBitmap(file);
-      const results = await detector.detect(bitmap);
-      const combined = results.map(r => r.rawValue).join(' ').replace(/[^A-Z0-9]/gi, '').toUpperCase();
-      const match = combined.match(/[A-Z]{2}[0-9]{3}[A-Z]{2}/);
-      if (match) {
-        document.getElementById('f-targa').value = match[0];
-        status.style.color = '#6ee7b7';
-        status.textContent = '✓ ' + match[0];
-        btn.disabled = false;
-        return;
-      }
-    } catch(e) {}
-  }
-
-  // 2) Fallback: Tesseract.js con timeout 20s e preprocessing immagine
   try {
-    status.textContent = '⏳ Caricamento OCR…';
-    if (typeof Tesseract === 'undefined') {
-      await new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://unpkg.com/tesseract.js@4/dist/tesseract.min.js';
-        s.onload = res; s.onerror = rej;
-        document.head.appendChild(s);
-      });
-    }
-    status.textContent = '⏳ Lettura targa…';
-    const imgData = await preprocessPlate(file);
-    const ocrResult = Tesseract.recognize(imgData, 'eng', {
-      tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-      tessedit_pageseg_mode: '7',
-      oem: '0',
-    });
-    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 20000));
-    const { data: { text } } = await Promise.race([ocrResult, timeout]);
-    const cleaned = text.replace(/[^A-Z0-9]/g, '');
-    const match = cleaned.match(/[A-Z]{2}[0-9]{3}[A-Z]{2}/);
+    status.textContent = '🔍 Lettura targa…';
+    const formData = new FormData();
+    formData.append('image', file);
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
+    const fetchResult = fetch('https://api.api-ninjas.com/v1/imagetotext', {
+      method: 'POST',
+      headers: { 'X-Api-Key': 'H6ZcFuyNo6dPJr33DiEUvukAY7jaEg1sF49gDild' },
+      body: formData,
+    }).then(r => r.json());
+    const data = await Promise.race([fetchResult, timeout]);
+    const combined = (Array.isArray(data) ? data.map(d => d.text).join(' ') : '')
+      .replace(/[^A-Z0-9]/gi, '').toUpperCase();
+    const match = combined.match(/[A-Z]{2}[0-9]{3}[A-Z]{2}/);
     if (match) {
       document.getElementById('f-targa').value = match[0];
       status.style.color = '#6ee7b7';
@@ -830,9 +803,7 @@ async function runOCR(file, status, btn) {
     }
   } catch(e) {
     status.style.color = '#f87171';
-    status.textContent = e.message === 'timeout'
-      ? '✗ Troppo lento — inserisci manualmente'
-      : '✗ Errore — inserisci manualmente';
+    status.textContent = e.message === 'timeout' ? '✗ Timeout — inserisci manualmente' : '✗ Errore — inserisci manualmente';
   }
   btn.disabled = false;
 }

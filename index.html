@@ -781,11 +781,15 @@ function processOCR(input) {
 async function runOCR(file, status, btn) {
   try {
     status.style.color = '#64748b';
-    status.textContent = '🔍 Invio immagine…';
+    status.textContent = '🔍 Elaborazione immagine…';
     console.log('[OCR] file:', file.name, file.type, file.size, 'bytes');
 
+    const processedBlob = await preprocessPlate(file);
+    console.log('[OCR] preprocessed size:', processedBlob.size, 'bytes');
+
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('image', processedBlob, 'targa.png');
+    status.textContent = '🔍 Invio immagine…';
 
     const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
     const fetchResult = fetch('https://api.api-ninjas.com/v1/imagetotext', {
@@ -821,13 +825,14 @@ async function runOCR(file, status, btn) {
     const match = cleaned.match(/[A-Z]{2}[0-9]{3}[A-Z]{2}/);
     console.log('[OCR] match targa:', match);
 
+    const rawDisplay = combined.slice(0, 80);
     if (match) {
       document.getElementById('f-targa').value = match[0];
       status.style.color = '#6ee7b7';
-      status.textContent = '✓ ' + match[0];
+      status.textContent = '✓ ' + match[0] + '  (testo grezzo: ' + rawDisplay + ')';
     } else {
       status.style.color = '#fbbf24';
-      status.textContent = '⚠ Testo trovato ma nessuna targa — testo: ' + combined.slice(0, 60);
+      status.textContent = '⚠ Nessuna targa — testo grezzo: ' + rawDisplay;
     }
   } catch(e) {
     console.error('[OCR] errore:', e);
@@ -859,6 +864,37 @@ function preprocessPlate(file) {
       ctx.putImageData(d, 0, 0);
       URL.revokeObjectURL(url);
       resolve(c.toDataURL('image/png'));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
+function preprocessPlate(file) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      // Scala a max 1200px largezza, mantieni proporzioni
+      const scale = Math.min(1, 1200 / img.width);
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      // Aumenta contrasto: converti in scala di grigi con soglia
+      const d = ctx.getImageData(0, 0, w, h);
+      for (let i = 0; i < d.data.length; i += 4) {
+        // Contrasto forte prima della soglia
+        let g = 0.299*d.data[i] + 0.587*d.data[i+1] + 0.114*d.data[i+2];
+        g = Math.min(255, Math.max(0, (g - 128) * 1.8 + 128));
+        const v = g > 140 ? 255 : 0;
+        d.data[i] = d.data[i+1] = d.data[i+2] = v;
+      }
+      ctx.putImageData(d, 0, 0);
+      URL.revokeObjectURL(url);
+      c.toBlob(blob => resolve(blob), 'image/png');
     };
     img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
     img.src = url;

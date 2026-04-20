@@ -59,6 +59,7 @@
       border-bottom: 1px solid #0f172a;
       flex-shrink: 0;
       overflow-x: auto;
+      align-items: center;
     }
 
     .cfield {
@@ -84,7 +85,162 @@
       white-space: nowrap;
     }
 
-    .cfield-doc span { color: #60a5fa; }
+    .cfield-targa span { color: #60a5fa; }
+    .cfield-empty { color: #2d4060; font-size: 13px; padding: 10px 14px; }
+
+    /* ── MODALE CLIENTE ────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #1e293b;
+      border-radius: 16px;
+      width: min(480px, 95vw);
+      max-height: 85dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid #1e3a5f;
+    }
+
+    .modal-header {
+      background: #0f172a;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #64a4e8;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #64748b;
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 4px;
+    }
+    .modal-close:active { color: #e2e8f0; }
+
+    .modal-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+    .modal-search {
+      background: #0f172a;
+      border: 1px solid #1e3a5f;
+      border-radius: 8px;
+      color: #e2e8f0;
+      padding: 8px 12px;
+      font-size: 14px;
+      outline: none;
+      width: 100%;
+    }
+    .modal-search:focus { border-color: #3b82f6; }
+
+    .customer-list { display: flex; flex-direction: column; gap: 4px; }
+
+    .customer-item {
+      background: #0f172a;
+      border: 1px solid #1e3a5f;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .customer-item:active { background: #1a2d4a; }
+    .customer-item .ci-name { font-size: 14px; font-weight: 700; color: #e2e8f0; }
+    .customer-item .ci-sub  { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+    .btn-new-customer {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      flex-shrink: 0;
+    }
+    .btn-new-customer:active { background: #1d4ed8; }
+
+    .customer-form { display: flex; flex-direction: column; gap: 8px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .form-row.single { grid-template-columns: 1fr; }
+
+    .form-field { display: flex; flex-direction: column; gap: 4px; }
+    .form-field label { font-size: 10px; color: #4b6a9a; text-transform: uppercase; letter-spacing: 0.6px; }
+    .form-field input {
+      background: #0f172a;
+      border: 1px solid #1e3a5f;
+      border-radius: 8px;
+      color: #e2e8f0;
+      padding: 8px 10px;
+      font-size: 14px;
+      outline: none;
+    }
+    .form-field input:focus { border-color: #3b82f6; }
+    .form-field input.err   { border-color: #ef4444; }
+
+    .form-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+    .btn-save {
+      flex: 1;
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-save:active { background: #15803d; }
+
+    .btn-cancel-form {
+      background: #374151;
+      color: #9ca3af;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .btn-cancel-form:active { background: #4b5563; }
+
+    /* ── BOTTONE CLIENTE SUL TASTIERINO ──────────────────── */
+    .btn-select-customer {
+      background: #1e3a5f;
+      border: 1px dashed #3b82f6;
+      border-radius: 10px;
+      color: #93c5fd;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 12px;
+      cursor: pointer;
+      text-align: left;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      touch-action: manipulation;
+    }
+    .btn-select-customer:active { background: #2a4f7a; }
 
     /* ── TOOLBAR INSERIMENTO ───────────────────────────────── */
     .services-toolbar {
@@ -309,23 +465,8 @@
     <div class="panel-header">👤 Cliente</div>
 
     <!-- Anagrafica -->
-    <div class="customer-bar">
-      <div class="cfield">
-        <label>Nome / Ragione sociale</label>
-        <span id="cust-name">Mario Rossi S.r.l.</span>
-      </div>
-      <div class="cfield">
-        <label>P.IVA / C.F.</label>
-        <span id="cust-piva">IT 01234567890</span>
-      </div>
-      <div class="cfield">
-        <label>Indirizzo</label>
-        <span id="cust-addr">Via Roma 12 — Milano</span>
-      </div>
-      <div class="cfield cfield-doc">
-        <label>Documento</label>
-        <span id="cust-doc"># 2024-0042</span>
-      </div>
+    <div class="customer-bar" id="customer-bar">
+      <span class="cfield-empty">Nessun cliente selezionato</span>
     </div>
 
     <!-- Toolbar inserimento riga -->
@@ -370,6 +511,9 @@
     <div class="panel">
       <div class="panel-header">🔢 Tastierino</div>
       <div class="keypad-wrap">
+        <button class="btn-select-customer" onclick="openCustomerModal()">
+          <span>👤</span><span id="btn-cust-label">Seleziona cliente…</span>
+        </button>
         <div class="kp-display">
           <span class="kp-op-indicator" id="kp-op"></span>
           <span id="kp-val">0</span>
@@ -413,7 +557,205 @@
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════
+     MODALE SELEZIONE / AGGIUNTA CLIENTE
+════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="customer-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modal-title">👤 Clienti</span>
+      <button class="modal-close" onclick="closeCustomerModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Vista: lista clienti -->
+      <div id="view-list">
+        <input class="modal-search" id="cust-search" type="text" placeholder="Cerca cliente…" oninput="renderCustomerList()">
+        <button class="btn-new-customer" onclick="showForm(null)">＋ Nuovo cliente</button>
+        <div class="customer-list" id="customer-list"></div>
+      </div>
+
+      <!-- Vista: form aggiunta/modifica -->
+      <div id="view-form" style="display:none">
+        <div class="customer-form">
+          <div class="form-row">
+            <div class="form-field">
+              <label>Nome</label>
+              <input id="f-nome" type="text" placeholder="Mario">
+            </div>
+            <div class="form-field">
+              <label>Cognome</label>
+              <input id="f-cognome" type="text" placeholder="Rossi">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Telefono</label>
+              <input id="f-telefono" type="tel" placeholder="+39 …">
+            </div>
+            <div class="form-field">
+              <label>Email</label>
+              <input id="f-email" type="email" placeholder="mario@esempio.it">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Automobile</label>
+              <input id="f-auto" type="text" placeholder="Fiat Panda">
+            </div>
+            <div class="form-field">
+              <label>Targa</label>
+              <input id="f-targa" type="text" placeholder="AB123CD" style="text-transform:uppercase">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-cancel-form" onclick="showList()">← Lista</button>
+            <button class="btn-save" onclick="saveCustomer()">Salva cliente</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <script>
+// ── CLIENTI ────────────────────────────────────────────────────────
+let customers = JSON.parse(localStorage.getItem('tg_customers') || '[]');
+let currentCustomer = null;
+let editingCustomerId = null;
+
+function saveCustomersToStorage() {
+  localStorage.setItem('tg_customers', JSON.stringify(customers));
+}
+
+function openCustomerModal() {
+  showList();
+  document.getElementById('customer-modal').classList.add('open');
+}
+
+function closeCustomerModal() {
+  document.getElementById('customer-modal').classList.remove('open');
+}
+
+function showList() {
+  document.getElementById('view-list').style.display = '';
+  document.getElementById('view-form').style.display = 'none';
+  document.getElementById('modal-title').textContent = '👤 Clienti';
+  document.getElementById('cust-search').value = '';
+  editingCustomerId = null;
+  renderCustomerList();
+}
+
+function showForm(customer) {
+  editingCustomerId = customer ? customer.id : null;
+  document.getElementById('f-nome').value     = customer?.nome     || '';
+  document.getElementById('f-cognome').value  = customer?.cognome  || '';
+  document.getElementById('f-telefono').value = customer?.telefono || '';
+  document.getElementById('f-email').value    = customer?.email    || '';
+  document.getElementById('f-auto').value     = customer?.auto     || '';
+  document.getElementById('f-targa').value    = customer?.targa    || '';
+  document.getElementById('view-list').style.display = 'none';
+  document.getElementById('view-form').style.display = '';
+  document.getElementById('modal-title').textContent = editingCustomerId ? '✏️ Modifica' : '＋ Nuovo cliente';
+}
+
+function saveCustomer() {
+  const nome    = document.getElementById('f-nome').value.trim();
+  const cognome = document.getElementById('f-cognome').value.trim();
+  if (!nome && !cognome) {
+    document.getElementById('f-nome').classList.add('err');
+    setTimeout(() => document.getElementById('f-nome').classList.remove('err'), 900);
+    return;
+  }
+  const data = {
+    id:       editingCustomerId || Date.now(),
+    nome,
+    cognome,
+    telefono: document.getElementById('f-telefono').value.trim(),
+    email:    document.getElementById('f-email').value.trim(),
+    auto:     document.getElementById('f-auto').value.trim(),
+    targa:    document.getElementById('f-targa').value.trim().toUpperCase(),
+  };
+  if (editingCustomerId) {
+    customers = customers.map(c => c.id === editingCustomerId ? data : c);
+  } else {
+    customers.push(data);
+  }
+  saveCustomersToStorage();
+  selectCustomer(data);
+}
+
+function selectCustomer(c) {
+  currentCustomer = c;
+  renderCustomerBar();
+  const label = [c.nome, c.cognome].filter(Boolean).join(' ');
+  document.getElementById('btn-cust-label').textContent = label || 'Cliente selezionato';
+  closeCustomerModal();
+}
+
+function deleteCustomer(id, e) {
+  e.stopPropagation();
+  customers = customers.filter(c => c.id !== id);
+  saveCustomersToStorage();
+  if (currentCustomer?.id === id) {
+    currentCustomer = null;
+    renderCustomerBar();
+    document.getElementById('btn-cust-label').textContent = 'Seleziona cliente…';
+  }
+  renderCustomerList();
+}
+
+function renderCustomerList() {
+  const q = (document.getElementById('cust-search').value || '').toLowerCase();
+  const filtered = customers.filter(c =>
+    [c.nome, c.cognome, c.telefono, c.auto, c.targa].join(' ').toLowerCase().includes(q)
+  );
+  const list = document.getElementById('customer-list');
+  if (!filtered.length) {
+    list.innerHTML = '<div style="color:#2d4060;font-size:13px;padding:10px 0">Nessun cliente trovato</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(c => {
+    const name = [c.nome, c.cognome].filter(Boolean).join(' ') || '—';
+    const sub  = [c.auto, c.targa ? `(${c.targa})` : ''].filter(Boolean).join(' ');
+    return `<div class="customer-item" onclick="selectCustomer(${JSON.stringify(c).replace(/"/g,'&quot;')})">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="ci-name">${esc(name)}</span>
+        <span style="display:flex;gap:6px">
+          <button style="background:none;border:none;color:#64748b;font-size:13px;cursor:pointer;padding:2px 4px" onclick="showForm(${JSON.stringify(c).replace(/"/g,'&quot;')});event.stopPropagation()">✏️</button>
+          <button style="background:none;border:none;color:#f87171;font-size:13px;cursor:pointer;padding:2px 4px" onclick="deleteCustomer(${c.id},event)">✕</button>
+        </span>
+      </div>
+      <div class="ci-sub">${esc([c.telefono, c.email].filter(Boolean).join(' · '))}${sub ? ' · '+esc(sub) : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderCustomerBar() {
+  const bar = document.getElementById('customer-bar');
+  if (!currentCustomer) {
+    bar.innerHTML = '<span class="cfield-empty">Nessun cliente selezionato</span>';
+    return;
+  }
+  const c = currentCustomer;
+  const fields = [
+    { label:'Nome',       val: [c.nome, c.cognome].filter(Boolean).join(' ') },
+    { label:'Telefono',   val: c.telefono },
+    { label:'Email',      val: c.email    },
+    { label:'Automobile', val: c.auto     },
+    { label:'Targa',      val: c.targa, cls:'cfield-targa' },
+  ];
+  bar.innerHTML = fields.filter(f => f.val).map(f =>
+    `<div class="cfield ${f.cls||''}"><label>${f.label}</label><span>${esc(f.val)}</span></div>`
+  ).join('');
+}
+
+// chiudi modale cliccando fuori
+document.getElementById('customer-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeCustomerModal();
+});
+
 // ── CATEGORIE ──────────────────────────────────────────────────────
 const CAT_STYLE = {
   'Manodopera': { bg:'#14290a', color:'#6ee7b7' },

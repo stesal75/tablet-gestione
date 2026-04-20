@@ -782,64 +782,43 @@ async function runOCR(file, status, btn) {
   try {
     status.style.color = '#64748b';
     status.textContent = '🔍 Elaborazione immagine…';
-    console.log('[OCR] file:', file.name, file.type, file.size, 'bytes');
 
-    const processedBlob = await preprocessPlate(file);
-    console.log('[OCR] preprocessed size:', processedBlob.size, 'bytes');
-
-    const formData = new FormData();
-    formData.append('image', processedBlob, 'targa.png');
-    status.textContent = '🔍 Invio immagine…';
+    const base64 = await preprocessPlate(file);
+    status.textContent = '🔍 Invio a Google Vision…';
 
     const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
-    const fetchResult = fetch('https://api.api-ninjas.com/v1/imagetotext', {
+    const fetchResult = fetch('https://vision.googleapis.com/v1/images:annotate?key=AIzaSyDYMwOdRDc9ho9AjeuZgnR7Hbud4Ivy69s', {
       method: 'POST',
-      headers: { 'X-Api-Key': 'H6ZcFuyNo6dPJr33DiEUvukAY7jaEg1sF49gDild' },
-      body: formData,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requests: [{ image: { content: base64 }, features: [{ type: 'TEXT_DETECTION' }] }]
+      }),
     }).then(async r => {
-      console.log('[OCR] HTTP status:', r.status, r.statusText);
       const raw = await r.text();
-      console.log('[OCR] risposta raw:', raw);
-      status.textContent = '📥 Risposta: ' + raw.slice(0, 120);
+      console.log('[OCR] HTTP:', r.status, '— risposta:', raw.slice(0, 400));
       return JSON.parse(raw);
     });
 
     const data = await Promise.race([fetchResult, timeout]);
-    console.log('[OCR] data parsed:', data);
-
-    console.log('[OCR] data type:', typeof data, 'isArray:', Array.isArray(data), 'keys:', data && typeof data === 'object' ? Object.keys(data) : 'n/a');
-
-    let combined = '';
-    if (Array.isArray(data)) {
-      combined = data.map(d => d.text || d.Text || JSON.stringify(d)).join(' ');
-    } else if (data && typeof data === 'object') {
-      combined = data.text || data.Text || data.result || data.words || JSON.stringify(data);
-    } else {
-      combined = String(data);
-    }
+    const combined = data?.responses?.[0]?.textAnnotations?.[0]?.description || '';
     console.log('[OCR] testo estratto:', combined);
 
     const cleaned = combined.replace(/[^A-Z0-9]/gi, '').toUpperCase();
-    console.log('[OCR] cleaned:', cleaned);
-
     const match = cleaned.match(/[A-Z]{2}[0-9]{3}[A-Z]{2}/);
-    console.log('[OCR] match targa:', match);
+    console.log('[OCR] cleaned:', cleaned, '— match:', match?.[0]);
 
-    const rawDisplay = combined.slice(0, 80);
     if (match) {
       document.getElementById('f-targa').value = match[0];
       status.style.color = '#6ee7b7';
-      status.textContent = '✓ ' + match[0] + '  (testo grezzo: ' + rawDisplay + ')';
+      status.textContent = '✓ ' + match[0] + (combined ? '  (testo: ' + combined.replace(/\n/g,' ').slice(0,60) + ')' : '');
     } else {
       status.style.color = '#fbbf24';
-      status.textContent = '⚠ Nessuna targa — testo grezzo: ' + rawDisplay;
+      status.textContent = '⚠ Nessuna targa — testo: ' + combined.replace(/\n/g,' ').slice(0, 80);
     }
   } catch(e) {
     console.error('[OCR] errore:', e);
     status.style.color = '#f87171';
-    status.textContent = e.message === 'timeout'
-      ? '✗ Timeout 15s'
-      : '✗ Errore: ' + e.message.slice(0, 60);
+    status.textContent = e.message === 'timeout' ? '✗ Timeout 15s' : '✗ Errore: ' + e.message.slice(0, 60);
   }
   btn.disabled = false;
 }
@@ -849,62 +828,31 @@ function preprocessPlate(file) {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
-      const scale = Math.min(1, 1200 / img.width);
-      const w = Math.round(img.width * scale);
-      const h = Math.round(img.height * scale);
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      const ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-      const d = ctx.getImageData(0, 0, w, h);
-      for (let i = 0; i < d.data.length; i += 4) {
-        const g = 0.299*d.data[i] + 0.587*d.data[i+1] + 0.114*d.data[i+2];
-        d.data[i] = d.data[i+1] = d.data[i+2] = g > 140 ? 255 : 0;
-      }
-      ctx.putImageData(d, 0, 0);
-      URL.revokeObjectURL(url);
-      resolve(c.toDataURL('image/png'));
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
-    img.src = url;
-  });
-}
-
-function preprocessPlate(file) {
-  return new Promise(resolve => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      // Ritaglia la zona centrale (60% larghezza, fascia verticale 40%-80%)
-      // dove la targa è solitamente inquadrata
-      const cropX = Math.round(img.width  * 0.20);
-      const cropY = Math.round(img.height * 0.35);
-      const cropW = Math.round(img.width  * 0.60);
-      const cropH = Math.round(img.height * 0.45);
-
-      // Scala il ritaglio a max 1200px larghezza
+      // Ritaglia zona centrale dove di solito è inquadrata la targa
+      const cropX = Math.round(img.width  * 0.10);
+      const cropY = Math.round(img.height * 0.30);
+      const cropW = Math.round(img.width  * 0.80);
+      const cropH = Math.round(img.height * 0.50);
       const scale = Math.min(1, 1200 / cropW);
       const w = Math.round(cropW * scale);
       const h = Math.round(cropH * scale);
-
       const c = document.createElement('canvas');
       c.width = w; c.height = h;
       const ctx = c.getContext('2d');
       ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, w, h);
-
-      // Scala di grigi + contrasto
+      // Contrasto aumentato
       const d = ctx.getImageData(0, 0, w, h);
       for (let i = 0; i < d.data.length; i += 4) {
         let g = 0.299*d.data[i] + 0.587*d.data[i+1] + 0.114*d.data[i+2];
         g = Math.min(255, Math.max(0, (g - 128) * 1.8 + 128));
-        const v = g > 140 ? 255 : 0;
-        d.data[i] = d.data[i+1] = d.data[i+2] = v;
+        d.data[i] = d.data[i+1] = d.data[i+2] = g > 140 ? 255 : 0;
       }
       ctx.putImageData(d, 0, 0);
       URL.revokeObjectURL(url);
-      c.toBlob(blob => resolve(blob), 'image/png');
+      // Restituisce base64 senza il prefisso data:image/png;base64,
+      resolve(c.toDataURL('image/png').split(',')[1]);
     };
-    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(''); };
     img.src = url;
   });
 }

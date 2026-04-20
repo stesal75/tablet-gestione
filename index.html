@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gestione Servizi</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100dvh;
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #111827;
+      color: #e2e8f0;
+    }
+
+    /* ── LAYOUT PRINCIPALE ─────────────────────────────────── */
+    .app {
+      display: grid;
+      grid-template-rows: 3fr 2fr;
+      height: 100dvh;
+      gap: 6px;
+      padding: 6px;
+    }
+
+    .panel {
+      background: #1e293b;
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .panel-header {
+      background: #0f172a;
+      padding: 7px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #64a4e8;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── ANAGRAFICA ────────────────────────────────────────── */
+    .customer-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid #0f172a;
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+
+    .cfield {
+      padding: 8px 14px;
+      border-right: 1px solid #0f172a;
+      min-width: 0;
+      flex-shrink: 0;
+    }
+    .cfield:last-child { border-right: none; }
+
+    .cfield label {
+      display: block;
+      font-size: 9px;
+      color: #4b6a9a;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 2px;
+    }
+
+    .cfield span {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .cfield-doc span { color: #60a5fa; }
+
+    /* ── TOOLBAR INSERIMENTO ───────────────────────────────── */
+    .services-toolbar {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding: 6px 10px;
+      border-bottom: 1px solid #0f172a;
+      flex-shrink: 0;
+    }
+
+    .inp {
+      background: #0f172a;
+      border: 1px solid #1e3a5f;
+      border-radius: 8px;
+      color: #e2e8f0;
+      padding: 7px 10px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    .inp:focus { border-color: #3b82f6; }
+    .inp.err   { border-color: #ef4444; }
+
+    .inp-desc   { flex: 3; }
+    .inp-cat    { flex: 2; }
+    .inp-amount {
+      flex: 1.4;
+      font-family: monospace;
+      font-size: 16px;
+      font-weight: 700;
+      color: #60a5fa !important;
+      text-align: right;
+      cursor: default;
+    }
+
+    .btn-add {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0 16px;
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+      height: 38px;
+      flex-shrink: 0;
+      touch-action: manipulation;
+    }
+    .btn-add:active { background: #1d4ed8; }
+
+    /* ── TABELLA SERVIZI ───────────────────────────────────── */
+    .services-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+    thead th {
+      background: #0a111e;
+      padding: 6px 10px;
+      text-align: left;
+      font-size: 10px;
+      color: #4b6a9a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tbody td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #0f172a;
+      vertical-align: middle;
+    }
+
+    tbody tr:active td { background: #1a2d4a; }
+
+    .td-n    { color: #4b6a9a; font-size: 11px; width: 28px; }
+    .td-amt  { text-align: right; font-family: monospace; font-weight: 700; color: #e2e8f0; }
+    .td-del  { width: 34px; text-align: center; }
+
+    .btn-del {
+      background: none;
+      border: none;
+      color: #f87171;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px 6px;
+      line-height: 1;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .empty-msg {
+      text-align: center;
+      color: #2d4060;
+      font-size: 13px;
+      padding: 20px;
+    }
+
+    /* ── TASTIERINO ────────────────────────────────────────── */
+    .keypad-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 8px;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    .kp-display {
+      background: #0a111e;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-family: monospace;
+      font-size: 24px;
+      font-weight: 700;
+      color: #60a5fa;
+      text-align: right;
+      flex-shrink: 0;
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .kp-op-indicator {
+      font-size: 15px;
+      color: #f59e0b;
+      min-width: 16px;
+      text-align: center;
+    }
+
+    .kp-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      flex: 1;
+    }
+
+    .key {
+      background: #0f172a;
+      border: none;
+      border-radius: 10px;
+      color: #e2e8f0;
+      font-size: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: background 0.08s, transform 0.08s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .key:active { background: #1e3a5f; transform: scale(0.94); }
+
+    .key-op    { background: #1e3a5f; color: #93c5fd; }
+    .key-op:active { background: #2a4f7a; }
+    .key-eq    { background: #1d4ed8; color: #fff; }
+    .key-eq:active { background: #1e40af; }
+    .key-clear { background: #7f1d1d; color: #fca5a5; font-size: 14px; }
+    .key-clear:active { background: #991b1b; }
+    .key-back  { background: #451a03; color: #fcd34d; font-size: 17px; }
+    .key-back:active { background: #78350f; }
+    .key-zero  { grid-column: span 2; }
+
+    /* ── TOTALI ────────────────────────────────────────────── */
+    .totals-wrap {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .tot-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 12px;
+      background: #0f172a;
+      border-radius: 10px;
+    }
+
+    .tot-label { font-size: 13px; color: #93c5fd; }
+    .tot-value { font-family: monospace; font-size: 16px; font-weight: 700; }
+
+    .tot-grand {
+      background: #1e3a5f;
+      border: 1px solid #3b82f6;
+    }
+    .tot-grand .tot-label { font-size: 13px; font-weight: 700; color: #e2e8f0; }
+    .tot-grand .tot-value { font-size: 20px; color: #93c5fd; }
+
+    .tot-empty { color: #2d4060; font-size: 13px; text-align: center; padding: 16px 0; }
+
+    /* ── SCROLLBAR ─────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ═══════════════════════════════════════════════════════
+       PANNELLO SUPERIORE — Anagrafica + Servizi
+  ════════════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-top">
+    <div class="panel-header">👤 Cliente</div>
+
+    <!-- Anagrafica -->
+    <div class="customer-bar">
+      <div class="cfield">
+        <label>Nome / Ragione sociale</label>
+        <span id="cust-name">Mario Rossi S.r.l.</span>
+      </div>
+      <div class="cfield">
+        <label>P.IVA / C.F.</label>
+        <span id="cust-piva">IT 01234567890</span>
+      </div>
+      <div class="cfield">
+        <label>Indirizzo</label>
+        <span id="cust-addr">Via Roma 12 — Milano</span>
+      </div>
+      <div class="cfield cfield-doc">
+        <label>Documento</label>
+        <span id="cust-doc"># 2024-0042</span>
+      </div>
+    </div>
+
+    <!-- Toolbar inserimento riga -->
+    <div class="services-toolbar">
+      <input class="inp inp-desc" id="inp-desc" type="text" placeholder="Descrizione servizio…">
+      <select class="inp inp-cat" id="inp-cat">
+        <option value="">— Categoria —</option>
+        <option>Manodopera</option>
+        <option>Materiali</option>
+        <option>Trasferta</option>
+        <option>Consulenza</option>
+        <option>Altro</option>
+      </select>
+      <input class="inp inp-amount" id="inp-amount" type="text" placeholder="0,00" readonly>
+      <button class="btn-add" onclick="addRow()">＋</button>
+    </div>
+
+    <!-- Lista servizi -->
+    <div class="services-list">
+      <table>
+        <thead>
+          <tr>
+            <th class="td-n">#</th>
+            <th>Descrizione</th>
+            <th>Categoria</th>
+            <th style="text-align:right">Importo €</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div id="empty-msg" class="empty-msg">Nessun servizio inserito</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       PANNELLO INFERIORE
+  ════════════════════════════════════════════════════════ -->
+  <div class="panel-bottom">
+
+    <!-- ── TASTIERINO ── -->
+    <div class="panel">
+      <div class="panel-header">🔢 Tastierino</div>
+      <div class="keypad-wrap">
+        <div class="kp-display">
+          <span class="kp-op-indicator" id="kp-op"></span>
+          <span id="kp-val">0</span>
+        </div>
+        <div class="kp-grid">
+          <button class="key key-clear" onclick="kpClear()">CLR</button>
+          <button class="key key-back"  onclick="kpBack()">⌫</button>
+          <button class="key key-op"    onclick="kpOp('%')">%</button>
+          <button class="key key-op"    onclick="kpOp('÷')">÷</button>
+
+          <button class="key" onclick="kpDigit('7')">7</button>
+          <button class="key" onclick="kpDigit('8')">8</button>
+          <button class="key" onclick="kpDigit('9')">9</button>
+          <button class="key key-op" onclick="kpOp('×')">×</button>
+
+          <button class="key" onclick="kpDigit('4')">4</button>
+          <button class="key" onclick="kpDigit('5')">5</button>
+          <button class="key" onclick="kpDigit('6')">6</button>
+          <button class="key key-op" onclick="kpOp('−')">−</button>
+
+          <button class="key" onclick="kpDigit('1')">1</button>
+          <button class="key" onclick="kpDigit('2')">2</button>
+          <button class="key" onclick="kpDigit('3')">3</button>
+          <button class="key key-op" onclick="kpOp('+')">+</button>
+
+          <button class="key key-zero" onclick="kpDigit('0')">0</button>
+          <button class="key" onclick="kpDot()">,</button>
+          <button class="key key-eq"   onclick="kpEqual()">=</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TOTALI ── -->
+    <div class="panel">
+      <div class="panel-header">📊 Totali</div>
+      <div class="totals-wrap" id="totals-wrap">
+        <div class="tot-empty">Nessun dato</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── CATEGORIE ──────────────────────────────────────────────────────
+const CAT_STYLE = {
+  'Manodopera': { bg:'#14290a', color:'#6ee7b7' },
+  'Materiali':  { bg:'#2d1700', color:'#fbbf24' },
+  'Trasferta':  { bg:'#0d1f4a', color:'#93c5fd' },
+  'Consulenza': { bg:'#1e0a2e', color:'#c084fc' },
+  'Altro':      { bg:'#1c1c00', color:'#d4d460' },
+};
+
+function catStyle(cat) {
+  return CAT_STYLE[cat] || CAT_STYLE['Altro'];
+}
+
+// ── RIGHE SERVIZIO ──────────────────────────────────────────────────
+let rows = [];
+let uid  = 1;
+
+function addRow() {
+  const desc  = document.getElementById('inp-desc').value.trim();
+  const cat   = document.getElementById('inp-cat').value || 'Altro';
+  const amtRaw = document.getElementById('inp-amount').value.replace(',', '.');
+  const amt   = parseFloat(amtRaw) || 0;
+
+  let ok = true;
+  if (!desc) { flash('inp-desc'); ok = false; }
+  if (amt === 0) { flash('inp-amount'); ok = false; }
+  if (!ok) return;
+
+  rows.push({ id: uid++, desc, cat, amt });
+
+  document.getElementById('inp-desc').value = '';
+  document.getElementById('inp-cat').value  = '';
+  kpReset();
+
+  render();
+}
+
+function deleteRow(id) {
+  rows = rows.filter(r => r.id !== id);
+  render();
+}
+
+function render() {
+  renderRows();
+  renderTotals();
+}
+
+function renderRows() {
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty-msg');
+
+  if (!rows.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = rows.map((r, i) => {
+    const s = catStyle(r.cat);
+    return `<tr>
+      <td class="td-n">${i+1}</td>
+      <td>${esc(r.desc)}</td>
+      <td><span class="badge" style="background:${s.bg};color:${s.color}">${esc(r.cat)}</span></td>
+      <td class="td-amt">${money(r.amt)}</td>
+      <td class="td-del"><button class="btn-del" onclick="deleteRow(${r.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderTotals() {
+  const wrap = document.getElementById('totals-wrap');
+
+  if (!rows.length) {
+    wrap.innerHTML = '<div class="tot-empty">Nessun dato</div>';
+    return;
+  }
+
+  const byCat = {};
+  let grand = 0;
+  for (const r of rows) {
+    byCat[r.cat] = (byCat[r.cat] || 0) + r.amt;
+    grand += r.amt;
+  }
+
+  const catHtml = Object.entries(byCat)
+    .sort((a,b) => b[1] - a[1])
+    .map(([cat, tot]) => {
+      const s = catStyle(cat);
+      return `<div class="tot-row">
+        <span class="tot-label">
+          <span class="badge" style="background:${s.bg};color:${s.color}">${esc(cat)}</span>
+        </span>
+        <span class="tot-value" style="color:${s.color}">${money(tot)}</span>
+      </div>`;
+    }).join('');
+
+  wrap.innerHTML = `
+    <div class="tot-row tot-grand">
+      <span class="tot-label">TOTALE GLOBALE</span>
+      <span class="tot-value">${money(grand)}</span>
+    </div>
+    ${catHtml}
+  `;
+}
+
+// ── TASTIERINO ─────────────────────────────────────────────────────
+const kp = { val:'0', op:null, stored:null, fresh:true, hasDot:false };
+
+function kpReset() {
+  kp.val='0'; kp.op=null; kp.stored=null; kp.fresh=true; kp.hasDot=false;
+  syncDisplay();
+}
+
+function kpDigit(d) {
+  if (kp.fresh) {
+    kp.val = d==='0' ? '0' : d;
+    kp.hasDot = false;
+    kp.fresh = false;
+  } else {
+    if (kp.val==='0' && d!=='0') kp.val = d;
+    else if (kp.val.replace(/[-.]/g,'').length < 10) kp.val += d;
+  }
+  syncDisplay();
+}
+
+function kpDot() {
+  if (kp.hasDot) return;
+  if (kp.fresh) { kp.val='0.'; kp.fresh=false; } else { kp.val+='.'; }
+  kp.hasDot = true;
+  syncDisplay();
+}
+
+function kpBack() {
+  if (kp.fresh) return;
+  if (kp.val.length <= 1 || (kp.val.length===2 && kp.val[0]==='-')) {
+    kp.val='0'; kp.fresh=true; kp.hasDot=false;
+  } else {
+    if (kp.val.slice(-1)==='.') kp.hasDot=false;
+    kp.val = kp.val.slice(0,-1);
+  }
+  syncDisplay();
+}
+
+function kpClear() { kpReset(); }
+
+function kpOp(op) {
+  if (kp.op && !kp.fresh) kpEqual();
+  kp.stored = parseFloat(kp.val) || 0;
+  kp.op = op;
+  kp.fresh = true;
+  syncDisplay();
+}
+
+function kpEqual() {
+  if (!kp.op || kp.stored===null) return;
+  const a=kp.stored, b=parseFloat(kp.val)||0;
+  let r;
+  switch(kp.op) {
+    case '+': r=a+b; break;
+    case '−': r=a-b; break;
+    case '×': r=a*b; break;
+    case '÷': r=b?a/b:0; break;
+    case '%': r=a*b/100; break;
+    default:  r=b;
+  }
+  kp.val = parseFloat(r.toFixed(6)).toString();
+  kp.op=null; kp.stored=null;
+  kp.hasDot = kp.val.includes('.');
+  kp.fresh = false;
+  syncDisplay();
+}
+
+function syncDisplay() {
+  document.getElementById('kp-val').textContent = kp.val.replace('.', ',');
+  document.getElementById('kp-op').textContent  = kp.op || '';
+
+  const v = parseFloat(kp.val) || 0;
+  document.getElementById('inp-amount').value = v > 0 ? kp.val.replace('.',',') : '';
+}
+
+// ── UTILITY ────────────────────────────────────────────────────────
+function money(n) {
+  return new Intl.NumberFormat('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n)+' €';
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function flash(id) {
+  const el = document.getElementById(id);
+  el.classList.add('err');
+  setTimeout(()=>el.classList.remove('err'), 900);
+}
+
+// init
+render();
+</script>
+</body>
+</html>

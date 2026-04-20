@@ -796,17 +796,22 @@ async function runOCR(file, status, btn) {
     }).then(async r => {
       const raw = await r.text();
       console.log('[OCR] HTTP:', r.status, raw);
-      status.textContent = 'HTTP ' + r.status + ': ' + raw.slice(0, 200);
-      return JSON.parse(raw);
+      return { status: r.status, data: JSON.parse(raw), raw };
     });
 
-    const data = await Promise.race([fetchResult, timeout]);
+    const { status: httpStatus, data, raw } = await Promise.race([fetchResult, timeout]);
     const combined = data?.responses?.[0]?.textAnnotations?.[0]?.description || '';
-    console.log('[OCR] testo estratto:', combined);
+    console.log('[OCR] HTTP:', httpStatus, '— testo:', combined);
+
+    if (httpStatus !== 200) {
+      status.style.color = '#f87171';
+      status.textContent = '✗ HTTP ' + httpStatus + ': ' + raw.slice(0, 150);
+      btn.disabled = false;
+      return;
+    }
 
     const cleaned = combined.replace(/[^A-Z0-9]/gi, '').toUpperCase();
     const match = cleaned.match(/[A-Z]{2}[0-9]{3}[A-Z]{2}/);
-    console.log('[OCR] cleaned:', cleaned, '— match:', match?.[0]);
 
     if (match) {
       document.getElementById('f-targa').value = match[0];
@@ -814,7 +819,7 @@ async function runOCR(file, status, btn) {
       status.textContent = '✓ ' + match[0] + (combined ? '  (testo: ' + combined.replace(/\n/g,' ').slice(0,60) + ')' : '');
     } else {
       status.style.color = '#fbbf24';
-      status.textContent = '⚠ Nessuna targa — testo: ' + combined.replace(/\n/g,' ').slice(0, 80);
+      status.textContent = '⚠ Nessuna targa — testo API: "' + combined.replace(/\n/g,' ').slice(0, 80) + '"';
     }
   } catch(e) {
     console.error('[OCR] errore:', e);

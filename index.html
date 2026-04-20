@@ -787,7 +787,7 @@ async function runOCR(file, status, btn) {
       const bitmap = await createImageBitmap(file);
       const results = await detector.detect(bitmap);
       const combined = results.map(r => r.rawValue).join(' ').replace(/[^A-Z0-9]/gi, '').toUpperCase();
-      const match = combined.match(/[A-Z]{2}[0-9]{3,4}[A-Z]{2}/) || combined.match(/[A-Z0-9]{6,8}/);
+      const match = combined.match(/[A-Z]{2}[0-9]{3}[A-Z]{2}/);
       if (match) {
         document.getElementById('f-targa').value = match[0];
         status.style.color = '#6ee7b7';
@@ -819,7 +819,7 @@ async function runOCR(file, status, btn) {
     const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 20000));
     const { data: { text } } = await Promise.race([ocrResult, timeout]);
     const cleaned = text.replace(/[^A-Z0-9]/g, '');
-    const match = cleaned.match(/[A-Z]{2}[0-9]{3,4}[A-Z]{2}/) || cleaned.match(/[A-Z0-9]{6,8}/);
+    const match = cleaned.match(/[A-Z]{2}[0-9]{3}[A-Z]{2}/);
     if (match) {
       document.getElementById('f-targa').value = match[0];
       status.style.color = '#6ee7b7';

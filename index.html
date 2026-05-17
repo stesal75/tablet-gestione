@@ -656,6 +656,59 @@
       color: #60a5fa;
     }
 
+    /* ── PULSANTI HEADER ───────────────────────────────────── */
+    .btn-hdr {
+      background: #0f172a;
+      border: 1px solid #1e3a5f;
+      border-radius: 7px;
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      cursor: pointer;
+      touch-action: manipulation;
+      letter-spacing: 0.3px;
+    }
+    .btn-hdr:active { background: #1e293b; }
+    .btn-hdr-save {
+      border-color: #16a34a;
+      color: #4ade80;
+      background: #052e16;
+    }
+    .btn-hdr-save:active { background: #064e1f; }
+    .btn-hdr-new {
+      border-color: #2563eb;
+      color: #93c5fd;
+      background: #0d2545;
+    }
+    .btn-hdr-new:active { background: #1e3a5f; }
+    .btn-hdr-open {
+      border-color: #d97706;
+      color: #fbbf24;
+      background: #1c1000;
+    }
+    .btn-hdr-open:active { background: #2d1f00; }
+
+    /* ── TOAST ──────────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #16a34a;
+      color: #fff;
+      padding: 9px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+
     /* ── SCROLLBAR ─────────────────────────────────────────── */
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 2px; }
@@ -670,7 +723,14 @@
        PANNELLO SUPERIORE — Anagrafica + Servizi
   ════════════════════════════════════════════════════════ -->
   <div class="panel" id="panel-top">
-    <div class="panel-header">👤 Cliente</div>
+    <div class="panel-header" style="justify-content:space-between">
+      <span>👤 Cliente</span>
+      <span style="display:flex;gap:6px">
+        <button class="btn-hdr btn-hdr-open" onclick="openRapportiniModal()">📂 Apri</button>
+        <button class="btn-hdr btn-hdr-save" onclick="saveRapportino()">💾 Salva</button>
+        <button class="btn-hdr btn-hdr-new"  onclick="newRapportino()">＋ Nuovo</button>
+      </span>
+    </div>
 
     <!-- Anagrafica -->
     <div class="customer-bar" id="customer-bar">
@@ -957,6 +1017,23 @@
     <div class="modal-body" style="gap:10px">
       <div id="icon-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px"></div>
       <button class="btn-cancel-form" style="width:100%;text-align:center" onclick="selectIcon(null)">Nessuna icona</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODALE RAPPORTINI SALVATI
+════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="rapportini-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span>📂 Rapportini salvati</span>
+      <button class="modal-close" onclick="closeRapportiniModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="customer-list" id="rapportini-list"></div>
     </div>
   </div>
 </div>
@@ -1781,6 +1858,132 @@ function qctxIcon() {
   const idx = _qbtnContextIdx;
   closeQbtnContext();
   openIconPicker(idx);
+}
+
+// ── RAPPORTINI ─────────────────────────────────────────────────────
+let rapportiniCounter = parseInt(localStorage.getItem('tg_rapp_counter') || '0');
+
+function saveRapportino() {
+  if (!rows.length && !currentCustomer) {
+    showToast('Nessun dato da salvare', '#ef4444');
+    return;
+  }
+  rapportiniCounter++;
+  const rapp = {
+    id: Date.now(),
+    numero: rapportiniCounter,
+    data: new Date().toISOString(),
+    customer: currentCustomer ? { ...currentCustomer } : null,
+    rows: JSON.parse(JSON.stringify(rows)),
+  };
+  const saved = JSON.parse(localStorage.getItem('tg_rapportini') || '[]');
+  saved.push(rapp);
+  localStorage.setItem('tg_rapportini', JSON.stringify(saved));
+  localStorage.setItem('tg_rapp_counter', rapportiniCounter);
+  showToast(`✓ Rapportino #${rapportiniCounter} salvato`);
+}
+
+function newRapportino() {
+  if (rows.length && !confirm('Aprire un nuovo rapportino? Le modifiche non salvate andranno perse.')) return;
+  rows = [];
+  uid  = 1;
+  currentCustomer = null;
+  renderCustomerBar();
+  document.getElementById('btn-cust-label').textContent = 'Seleziona cliente…';
+  document.getElementById('inp-desc').value = '';
+  document.getElementById('inp-cat').value  = '';
+  kpReset();
+  render();
+}
+
+// ── APRI RAPPORTINO ────────────────────────────────────────────────
+function openRapportiniModal() {
+  renderRapportiniList();
+  document.getElementById('rapportini-modal').classList.add('open');
+}
+
+function closeRapportiniModal() {
+  document.getElementById('rapportini-modal').classList.remove('open');
+}
+
+function renderRapportiniList() {
+  const saved = JSON.parse(localStorage.getItem('tg_rapportini') || '[]');
+  const list  = document.getElementById('rapportini-list');
+
+  if (!saved.length) {
+    list.innerHTML = '<div style="color:#2d4060;font-size:13px;padding:10px 0">Nessun rapportino salvato</div>';
+    return;
+  }
+
+  // più recente prima
+  const sorted = [...saved].sort((a, b) => b.id - a.id);
+
+  list.innerHTML = sorted.map(r => {
+    const custName = r.customer
+      ? [r.customer.nome, r.customer.cognome].filter(Boolean).join(' ') || '—'
+      : 'Nessun cliente';
+    const total = (r.rows || []).reduce((s, row) => s + (row.amt || 0), 0);
+    const data  = new Date(r.data).toLocaleString('it-IT', {
+      day:'2-digit', month:'2-digit', year:'numeric',
+      hour:'2-digit', minute:'2-digit'
+    });
+    return `<div class="customer-item" onclick="loadRapportino(${r.id})">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="ci-name">#${r.numero} — ${esc(custName)}</span>
+        <span style="display:flex;gap:6px;align-items:center">
+          <span style="font-family:monospace;font-size:13px;color:#60a5fa">${money(total)}</span>
+          <button style="background:none;border:none;color:#f87171;font-size:14px;cursor:pointer;padding:2px 6px"
+            onclick="deleteRapportino(${r.id},event)">✕</button>
+        </span>
+      </div>
+      <div class="ci-sub">${esc(data)} · ${(r.rows||[]).length} rig${(r.rows||[]).length===1?'a':'he'}</div>
+    </div>`;
+  }).join('');
+}
+
+function loadRapportino(id) {
+  if (rows.length && !confirm('Caricare questo rapportino? Le modifiche correnti non salvate andranno perse.')) return;
+  const saved = JSON.parse(localStorage.getItem('tg_rapportini') || '[]');
+  const rapp  = saved.find(r => r.id === id);
+  if (!rapp) return;
+
+  rows           = JSON.parse(JSON.stringify(rapp.rows || []));
+  currentCustomer = rapp.customer ? { ...rapp.customer } : null;
+  uid            = rows.length ? Math.max(...rows.map(r => r.id)) + 1 : 1;
+
+  renderCustomerBar();
+  document.getElementById('btn-cust-label').textContent = currentCustomer
+    ? ([currentCustomer.nome, currentCustomer.cognome].filter(Boolean).join(' ') || 'Cliente selezionato')
+    : 'Seleziona cliente…';
+  document.getElementById('inp-desc').value = '';
+  document.getElementById('inp-cat').value  = '';
+  kpReset();
+  render();
+  closeRapportiniModal();
+  showToast(`✓ Rapportino #${rapp.numero} caricato`);
+}
+
+function deleteRapportino(id, e) {
+  e.stopPropagation();
+  const saved = JSON.parse(localStorage.getItem('tg_rapportini') || '[]');
+  const rapp  = saved.find(r => r.id === id);
+  if (!rapp || !confirm(`Eliminare il rapportino #${rapp.numero}?`)) return;
+  localStorage.setItem('tg_rapportini', JSON.stringify(saved.filter(r => r.id !== id)));
+  renderRapportiniList();
+}
+
+document.getElementById('rapportini-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeRapportiniModal();
+});
+
+// ── TOAST ──────────────────────────────────────────────────────────
+function showToast(msg, bg = '#16a34a') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = bg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
 // ── DISTINTA BASE ──────────────────────────────────────────────────

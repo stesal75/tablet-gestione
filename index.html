@@ -18,10 +18,17 @@
     /* ── LAYOUT PRINCIPALE ─────────────────────────────────── */
     .app {
       display: grid;
-      grid-template-rows: 3fr 2fr;
+      grid-template-columns: 1fr 74px;
       height: 100dvh;
       gap: 6px;
       padding: 6px;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-rows: 3fr 2fr;
+      gap: 6px;
+      min-height: 0;
     }
 
     .panel {
@@ -449,6 +456,206 @@
 
     .tot-empty { color: #2d4060; font-size: 13px; text-align: center; padding: 16px 0; }
 
+    /* ── QUICK SIDEBAR ─────────────────────────────────────── */
+    .quick-sidebar {
+      background: #1e293b;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 6px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .qbtn {
+      width: 100%;
+      aspect-ratio: 1;
+      min-height: 52px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 9px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      flex-shrink: 0;
+      padding: 4px;
+      line-height: 1.2;
+      position: relative;
+      transition: transform 0.08s;
+    }
+    .qbtn:active { transform: scale(0.91); }
+
+    .qbtn-empty {
+      background: #0f172a;
+      border: 1.5px dashed #2d4060;
+      color: #2d4060;
+      font-size: 22px;
+    }
+
+    .qbtn-set {
+      background: #0d2545;
+      border: 1.5px solid #2563eb;
+      color: #93c5fd;
+    }
+
+    .qbtn-add {
+      background: #052e16;
+      border: 1.5px dashed #16a34a;
+      color: #4ade80;
+      font-size: 22px;
+      min-height: 44px;
+      aspect-ratio: unset;
+      flex-shrink: 0;
+    }
+    .qbtn-add:active { background: #064e1f; transform: scale(0.91); }
+
+    @keyframes qbtn-hold {
+      0%   { box-shadow: inset 0 0 0 0px rgba(239,68,68,0); }
+      100% { box-shadow: inset 0 0 0 3px rgba(239,68,68,0.9); }
+    }
+    .qbtn-holding {
+      animation: qbtn-hold 5s linear forwards;
+    }
+
+    /* ── CONTEXT SHEET ──────────────────────────────────────── */
+    .context-sheet {
+      background: #1e293b;
+      border-radius: 16px;
+      width: min(300px, 88vw);
+      overflow: hidden;
+      border: 1px solid #1e3a5f;
+    }
+
+    .context-sheet-header {
+      background: #0f172a;
+      padding: 10px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64a4e8;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .cs-btn {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      border-top: 1px solid #0f172a;
+      color: #e2e8f0;
+      padding: 14px 16px;
+      font-size: 15px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .cs-btn:active { background: #1a2d4a; }
+    .cs-btn.danger { color: #f87171; }
+    .cs-btn.muted  { color: #64748b; }
+
+    /* ── TYPE TAB (semplice / distinta base) ───────────────── */
+    .type-tab {
+      flex: 1;
+      background: #0f172a;
+      border: 1.5px solid #1e3a5f;
+      border-radius: 8px;
+      color: #64748b;
+      padding: 8px 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .type-tab.active {
+      background: #1e3a5f;
+      border-color: #3b82f6;
+      color: #93c5fd;
+    }
+
+    /* ── DISTINTA BASE ──────────────────────────────────────── */
+    .comp-search-wrap { position: relative; }
+
+    .comp-dropdown {
+      position: absolute;
+      top: calc(100% + 3px);
+      left: 0; right: 0;
+      background: #0d1a2e;
+      border: 1px solid #1e3a5f;
+      border-radius: 8px;
+      z-index: 20;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .comp-dd-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .comp-dd-item:last-child { border-bottom: none; }
+    .comp-dd-item:active { background: #1e3a5f; }
+    .comp-dd-item.already { opacity: 0.45; cursor: default; }
+
+    .comp-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 0;
+      border-bottom: 1px solid #0f172a;
+      font-size: 12px;
+    }
+    .comp-item:last-child { border-bottom: none; }
+
+    .comp-qty-btn {
+      background: #1e3a5f;
+      border: none;
+      border-radius: 6px;
+      color: #93c5fd;
+      font-size: 16px;
+      font-weight: 700;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      touch-action: manipulation;
+    }
+    .comp-qty-btn:active { background: #2a4f7a; }
+    .comp-qty-val {
+      min-width: 24px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    .bundle-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 0 0;
+      margin-top: 4px;
+      border-top: 1px solid #1e3a5f;
+      font-weight: 700;
+      font-size: 14px;
+      color: #60a5fa;
+    }
+
     /* ── SCROLLBAR ─────────────────────────────────────────── */
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 2px; }
@@ -457,6 +664,7 @@
 <body>
 
 <div class="app">
+<div class="main-content">
 
   <!-- ═══════════════════════════════════════════════════════
        PANNELLO SUPERIORE — Anagrafica + Servizi
@@ -492,6 +700,7 @@
             <th class="td-n">#</th>
             <th>Descrizione</th>
             <th>Categoria</th>
+            <th style="text-align:center">Qtà</th>
             <th style="text-align:right">Importo €</th>
             <th></th>
           </tr>
@@ -555,7 +764,13 @@
     </div>
 
   </div>
-</div>
+
+</div><!-- /main-content -->
+
+<!-- ── BARRA PULSANTI RAPIDI ── -->
+<div class="quick-sidebar" id="quick-sidebar"></div>
+
+</div><!-- /app -->
 
 <!-- ═══════════════════════════════════════════════════════
      MODALE SELEZIONE / AGGIUNTA CLIENTE
@@ -620,6 +835,128 @@
         </div>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODALE ASSEGNA PRODOTTO/SERVIZIO AL PULSANTE RAPIDO
+════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="qbtn-assign-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="qassign-title">🔗 Assegna prodotto/servizio</span>
+      <button class="modal-close" onclick="closeQbtnAssign()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Lista prodotti -->
+      <div id="qbtn-view-list">
+        <input class="modal-search" id="prod-search" type="text" placeholder="Cerca prodotto/servizio…" oninput="renderProdList()">
+        <button class="btn-new-customer" onclick="showProdForm(null)">＋ Nuovo prodotto/servizio</button>
+        <div class="customer-list" id="prod-list"></div>
+      </div>
+
+      <!-- Form prodotto -->
+      <div id="qbtn-view-form" style="display:none">
+        <div class="customer-form">
+
+          <!-- Toggle tipo -->
+          <div style="display:flex;gap:6px">
+            <button id="pf-tab-simple" class="type-tab active" onclick="setProdType('simple')">Servizio semplice</button>
+            <button id="pf-tab-bundle" class="type-tab" onclick="setProdType('bundle')">📦 Distinta base</button>
+          </div>
+
+          <!-- Codice + Descrizione -->
+          <div class="form-row">
+            <div class="form-field">
+              <label>Codice</label>
+              <input id="pf-code" type="text" placeholder="Es. MAN001" style="text-transform:uppercase">
+            </div>
+            <div class="form-field" style="flex:2">
+              <label>Descrizione</label>
+              <input id="pf-desc" type="text" placeholder="Es. Sostituzione olio">
+            </div>
+          </div>
+
+          <!-- Categoria (sempre visibile) -->
+          <div class="form-row single">
+            <div class="form-field">
+              <label>Categoria</label>
+              <select id="pf-cat" class="inp" style="width:100%;height:38px;border-radius:8px">
+                <option value="">— Categoria —</option>
+                <option>Manodopera</option>
+                <option>Materiali</option>
+                <option>Trasferta</option>
+                <option>Consulenza</option>
+                <option>Altro</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Prezzo (solo servizio semplice) -->
+          <div class="form-row single" id="pf-price-row">
+            <div class="form-field">
+              <label>Prezzo €</label>
+              <input id="pf-price" type="number" step="0.01" min="0" placeholder="0.00">
+            </div>
+          </div>
+
+          <!-- Distinta base: componenti -->
+          <div id="pf-bundle-section" style="display:none">
+            <div class="form-field">
+              <label>Componenti</label>
+              <div class="comp-search-wrap">
+                <input id="pf-comp-search" class="inp" style="width:100%" type="text"
+                  placeholder="Cerca articolo da aggiungere…"
+                  oninput="searchBundleComp()" autocomplete="off">
+                <div id="pf-comp-dropdown" class="comp-dropdown" style="display:none"></div>
+              </div>
+              <div id="pf-comp-list" style="margin-top:6px;min-height:24px"></div>
+              <div class="bundle-total">
+                <span>Totale calcolato</span>
+                <span id="pf-bundle-total">0,00 €</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-cancel-form" onclick="showProdList()">← Lista</button>
+            <button class="btn-save" onclick="saveProd()">Salva</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     CONTEXT MENU PULSANTE RAPIDO (pressione lunga)
+════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="qbtn-context-modal">
+  <div class="context-sheet">
+    <div class="context-sheet-header" id="qctx-title">Pulsante</div>
+    <button class="cs-btn" onclick="qctxChange()">🔗 Cambia associazione</button>
+    <button class="cs-btn" id="qctx-icon-btn" onclick="qctxIcon()">🎨 Cambia icona</button>
+    <button class="cs-btn danger" id="qctx-remove-btn" onclick="qctxRemove()">✕ Rimuovi associazione</button>
+    <button class="cs-btn danger" onclick="qctxDelete()">🗑 Elimina pulsante</button>
+    <button class="cs-btn muted" onclick="closeQbtnContext()">Annulla</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SELEZIONE ICONA PULSANTE RAPIDO
+════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="icon-picker-modal">
+  <div class="modal" style="max-width:340px">
+    <div class="modal-header">
+      <span>🎨 Scegli icona</span>
+      <button class="modal-close" onclick="closeIconPicker()">✕</button>
+    </div>
+    <div class="modal-body" style="gap:10px">
+      <div id="icon-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px"></div>
+      <button class="btn-cancel-form" style="width:100%;text-align:center" onclick="selectIcon(null)">Nessuna icona</button>
     </div>
   </div>
 </div>
@@ -720,7 +1057,11 @@ function renderCustomerList() {
   const q = (document.getElementById('cust-search').value || '').toLowerCase();
   const filtered = customers.filter(c =>
     [c.nome, c.cognome, c.telefono, c.auto, c.targa].join(' ').toLowerCase().includes(q)
-  );
+  ).sort((a, b) => {
+    const ka = (a.cognome + ' ' + a.nome).trim().toLowerCase();
+    const kb = (b.cognome + ' ' + b.nome).trim().toLowerCase();
+    return ka.localeCompare(kb, 'it');
+  });
   const list = document.getElementById('customer-list');
   if (!filtered.length) {
     list.innerHTML = '<div style="color:#2d4060;font-size:13px;padding:10px 0">Nessun cliente trovato</div>';
@@ -872,17 +1213,23 @@ let rows = [];
 let uid  = 1;
 
 function addRow() {
-  const desc  = document.getElementById('inp-desc').value.trim();
-  const cat   = document.getElementById('inp-cat').value || 'Altro';
-  const amtRaw = document.getElementById('inp-amount').value.replace(',', '.');
-  const amt   = parseFloat(amtRaw) || 0;
+  const desc      = document.getElementById('inp-desc').value.trim();
+  const cat       = document.getElementById('inp-cat').value || 'Altro';
+  const amtRaw    = document.getElementById('inp-amount').value.replace(',', '.');
+  const unitPrice = parseFloat(amtRaw) || 0;
 
   let ok = true;
   if (!desc) { flash('inp-desc'); ok = false; }
-  if (amt === 0) { flash('inp-amount'); ok = false; }
+  if (unitPrice === 0) { flash('inp-amount'); ok = false; }
   if (!ok) return;
 
-  rows.push({ id: uid++, desc, cat, amt });
+  const existing = rows.find(r => r.desc.toLowerCase() === desc.toLowerCase() && r.cat === cat);
+  if (existing) {
+    existing.qty = (existing.qty || 1) + 1;
+    existing.amt = existing.qty * existing.unitPrice;
+  } else {
+    rows.push({ id: uid++, desc, cat, qty: 1, unitPrice, amt: unitPrice });
+  }
 
   document.getElementById('inp-desc').value = '';
   document.getElementById('inp-cat').value  = '';
@@ -913,11 +1260,13 @@ function renderRows() {
   empty.style.display = 'none';
 
   tbody.innerHTML = rows.map((r, i) => {
-    const s = catStyle(r.cat);
+    const s   = catStyle(r.cat);
+    const qty = r.qty || 1;
     return `<tr>
       <td class="td-n">${i+1}</td>
       <td>${esc(r.desc)}</td>
       <td><span class="badge" style="background:${s.bg};color:${s.color}">${esc(r.cat)}</span></td>
+      <td style="text-align:center;width:36px;color:#93c5fd;font-weight:700;font-size:13px">${qty > 1 ? qty : ''}</td>
       <td class="td-amt">${money(r.amt)}</td>
       <td class="td-del"><button class="btn-del" onclick="deleteRow(${r.id})">✕</button></td>
     </tr>`;
@@ -1050,8 +1399,483 @@ function flash(id) {
   setTimeout(()=>el.classList.remove('err'), 900);
 }
 
+// ── PRODOTTI / SERVIZI (database) ──────────────────────────────────
+let products = JSON.parse(localStorage.getItem('tg_products') || '[]');
+
+function saveProducts() {
+  localStorage.setItem('tg_products', JSON.stringify(products));
+}
+
+// ── PULSANTI RAPIDI ────────────────────────────────────────────────
+let quickButtons = JSON.parse(localStorage.getItem('tg_quickbtns') || 'null') ||
+  [{ productId: null }, { productId: null }, { productId: null }, { productId: null }];
+
+function saveQuickButtons() {
+  localStorage.setItem('tg_quickbtns', JSON.stringify(quickButtons));
+}
+
+// -- Rendering sidebar --
+function renderSidebar() {
+  const sidebar = document.getElementById('quick-sidebar');
+  let html = '';
+
+  const displayOrder = quickButtons.map((_, i) => i).sort((a, b) => {
+    const pa = quickButtons[a].productId !== null ? products.find(p => p.id === quickButtons[a].productId) : null;
+    const pb = quickButtons[b].productId !== null ? products.find(p => p.id === quickButtons[b].productId) : null;
+    if (pa && pb) return pa.desc.localeCompare(pb.desc, 'it');
+    if (pa) return -1;
+    if (pb) return 1;
+    return 0;
+  });
+
+  displayOrder.forEach(i => {
+    const qb = quickButtons[i];
+    let btnHtml;
+    if (qb.productId !== null) {
+      const prod = products.find(p => p.id === qb.productId);
+      if (prod) {
+        const s = catStyle(prod.cat || 'Altro');
+        const icon = qb.icon || '';
+        const label = prod.desc.length > 10 ? prod.desc.slice(0, 9) + '…' : prod.desc;
+        const priceStr = typeof prod.price === 'number' ? prod.price.toFixed(2).replace('.', ',') + '€' : '';
+        btnHtml = `<button class="qbtn qbtn-set" data-idx="${i}"
+          style="background:${s.bg};border-color:${s.color};color:${s.color}"
+          oncontextmenu="return false">
+          ${icon ? `<span style="font-size:20px;line-height:1">${icon}</span>` : ''}
+          <span style="font-size:9px;text-align:center;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:block">${esc(label)}</span>
+          <span style="font-size:8px;font-family:monospace">${esc(priceStr)}</span>
+        </button>`;
+      } else {
+        btnHtml = `<button class="qbtn qbtn-empty" data-idx="${i}" oncontextmenu="return false" title="Prodotto rimosso">?</button>`;
+      }
+    } else {
+      btnHtml = `<button class="qbtn qbtn-empty" data-idx="${i}" oncontextmenu="return false">?</button>`;
+    }
+    html += btnHtml;
+  });
+
+  html += `<button class="qbtn qbtn-add" onclick="addQuickButton()">＋</button>`;
+  sidebar.innerHTML = html;
+
+  sidebar.querySelectorAll('.qbtn[data-idx]').forEach(el => {
+    const idx = parseInt(el.dataset.idx);
+    el.addEventListener('pointerdown', e => { e.preventDefault(); qbtnStartHold(idx, el); });
+    el.addEventListener('pointerup',   () => qbtnEndHold(idx));
+    el.addEventListener('pointercancel', qbtnCancelHold);
+    el.addEventListener('pointerleave',  qbtnCancelHold);
+    el.addEventListener('contextmenu', e => e.preventDefault());
+  });
+}
+
+// -- Long press logic --
+let _qbtnTimer = null;
+let _qbtnHoldEl = null;
+let _qbtnFired = false;
+
+function qbtnStartHold(idx, el) {
+  qbtnCancelHold();
+  _qbtnFired = false;
+  _qbtnHoldEl = el;
+  el.classList.add('qbtn-holding');
+  _qbtnTimer = setTimeout(() => {
+    _qbtnFired = true;
+    el.classList.remove('qbtn-holding');
+    _qbtnTimer = null;
+    openQbtnContext(idx);
+  }, 5000);
+}
+
+function qbtnEndHold(idx) {
+  if (_qbtnTimer !== null) {
+    clearTimeout(_qbtnTimer);
+    _qbtnTimer = null;
+    if (_qbtnHoldEl) _qbtnHoldEl.classList.remove('qbtn-holding');
+    _qbtnHoldEl = null;
+    if (!_qbtnFired) qbtnClick(idx);
+  }
+}
+
+function qbtnCancelHold() {
+  if (_qbtnTimer !== null) { clearTimeout(_qbtnTimer); _qbtnTimer = null; }
+  if (_qbtnHoldEl) { _qbtnHoldEl.classList.remove('qbtn-holding'); _qbtnHoldEl = null; }
+}
+
+function qbtnClick(idx) {
+  const qb = quickButtons[idx];
+  if (qb.productId === null) {
+    openQbtnAssign(idx);
+    return;
+  }
+  const prod = products.find(p => p.id === qb.productId);
+  if (!prod) { openQbtnAssign(idx); return; }
+  addQuickRow(prod, idx);
+}
+
+function addQuickRow(prod, idx) {
+  const existing = prod.id ? rows.find(r => r.productId === prod.id) : null;
+  if (existing) {
+    existing.qty = (existing.qty || 1) + 1;
+    existing.amt = existing.qty * existing.unitPrice;
+  } else {
+    const unitPrice = prod.price || 0;
+    rows.push({ id: uid++, desc: prod.desc, cat: prod.cat || 'Altro', qty: 1, unitPrice, amt: unitPrice, productId: prod.id || null });
+  }
+  render();
+  // feedback flash
+  const el = document.querySelector(`.qbtn[data-idx="${idx}"]`);
+  if (el) {
+    el.style.transition = 'none';
+    el.style.filter = 'brightness(2.2)';
+    setTimeout(() => { el.style.filter = ''; el.style.transition = ''; }, 180);
+  }
+}
+
+function addQuickButton() {
+  quickButtons.push({ productId: null });
+  saveQuickButtons();
+  renderSidebar();
+}
+
+// -- Assign modal --
+let _qbtnAssignIdx = null;
+let _editingProdId = null;
+let _currentProdType = 'simple';
+let _bundleComponents = []; // [{productId, qty}]
+
+function openQbtnAssign(idx) {
+  _qbtnAssignIdx = idx;
+  showProdList();
+  document.getElementById('qbtn-assign-modal').classList.add('open');
+}
+
+function closeQbtnAssign() {
+  document.getElementById('qbtn-assign-modal').classList.remove('open');
+  _qbtnAssignIdx = null;
+}
+
+function showProdList() {
+  document.getElementById('qbtn-view-list').style.display = '';
+  document.getElementById('qbtn-view-form').style.display = 'none';
+  document.getElementById('prod-search').value = '';
+  _editingProdId = null;
+  renderProdList();
+}
+
+function showProdForm(prod) {
+  _editingProdId = prod ? prod.id : null;
+  _bundleComponents = prod?.components ? JSON.parse(JSON.stringify(prod.components)) : [];
+  document.getElementById('pf-code').value  = prod?.code  || '';
+  document.getElementById('pf-desc').value  = prod?.desc  || '';
+  document.getElementById('pf-cat').value   = prod?.cat   || '';
+  document.getElementById('pf-price').value = prod?.price ?? '';
+  document.getElementById('qbtn-view-list').style.display = 'none';
+  document.getElementById('qbtn-view-form').style.display = '';
+  setProdType(prod?.type || 'simple');
+}
+
+function renderProdList() {
+  const q = (document.getElementById('prod-search').value || '').toLowerCase();
+  const filtered = products.filter(p => (p.desc + ' ' + p.cat + ' ' + (p.code||'')).toLowerCase().includes(q))
+    .sort((a, b) => a.desc.localeCompare(b.desc, 'it'));
+  const list = document.getElementById('prod-list');
+  if (!filtered.length) {
+    list.innerHTML = '<div style="color:#2d4060;font-size:13px;padding:10px 0">Nessun prodotto/servizio</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(p => {
+    const s = catStyle(p.cat || 'Altro');
+    const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
+    return `<div class="customer-item" onclick="assignProduct(${p.id})">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+        <span class="ci-name">${esc(p.desc)}</span>
+        <span style="display:flex;gap:4px;align-items:center;flex-shrink:0">
+          <span style="font-family:monospace;font-size:13px;color:#60a5fa">${money(p.price || 0)}</span>
+          <button style="background:none;border:none;color:#64748b;font-size:14px;cursor:pointer;padding:2px 4px" onclick="showProdForm(${pJson});event.stopPropagation()">✏️</button>
+          <button style="background:none;border:none;color:#f87171;font-size:14px;cursor:pointer;padding:2px 4px" onclick="deleteProd(${p.id},event)">✕</button>
+        </span>
+      </div>
+      <div class="ci-sub">
+        ${p.code ? `<span style="font-family:monospace;font-size:11px;color:#4b6a9a;margin-right:6px">${esc(p.code)}</span>` : ''}
+        <span class="badge" style="background:${s.bg};color:${s.color}">${esc(p.cat || 'Altro')}</span>
+        ${p.type === 'bundle' ? `<span class="badge" style="background:#1e0a2e;color:#c084fc;margin-left:4px">DB</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function assignProduct(productId) {
+  if (_qbtnAssignIdx !== null) {
+    quickButtons[_qbtnAssignIdx].productId = productId;
+    saveQuickButtons();
+    renderSidebar();
+    const idx = _qbtnAssignIdx;
+    closeQbtnAssign();
+    openIconPicker(idx);
+  } else {
+    closeQbtnAssign();
+  }
+}
+
+function saveProd() {
+  const code = document.getElementById('pf-code').value.trim().toUpperCase();
+  const desc = document.getElementById('pf-desc').value.trim();
+  const cat  = document.getElementById('pf-cat').value || 'Altro';
+  if (!desc) { flash('pf-desc'); return; }
+
+  let price, type, components;
+  if (_currentProdType === 'bundle') {
+    if (!_bundleComponents.length) {
+      const el = document.getElementById('pf-comp-search');
+      el.style.borderColor = '#ef4444';
+      setTimeout(() => el.style.borderColor = '', 900);
+      return;
+    }
+    price      = getBundleTotal();
+    type       = 'bundle';
+    components = JSON.parse(JSON.stringify(_bundleComponents));
+  } else {
+    price      = parseFloat(document.getElementById('pf-price').value) || 0;
+    type       = 'simple';
+    components = [];
+  }
+
+  if (_editingProdId) {
+    products = products.map(p => p.id === _editingProdId ? { id: p.id, code, desc, cat, price, type, components } : p);
+    saveProducts();
+    renderSidebar();
+    showProdList();
+  } else {
+    const newProd = { id: Date.now(), code, desc, cat, price, type, components };
+    products.push(newProd);
+    saveProducts();
+    if (_qbtnAssignIdx !== null) {
+      quickButtons[_qbtnAssignIdx].productId = newProd.id;
+      saveQuickButtons();
+      renderSidebar();
+      const idx = _qbtnAssignIdx;
+      closeQbtnAssign();
+      openIconPicker(idx);
+    } else {
+      renderSidebar();
+      showProdList();
+    }
+  }
+}
+
+function deleteProd(id, e) {
+  e.stopPropagation();
+  products = products.filter(p => p.id !== id);
+  quickButtons.forEach(qb => { if (qb.productId === id) qb.productId = null; });
+  saveProducts();
+  saveQuickButtons();
+  renderSidebar();
+  renderProdList();
+}
+
+// -- Context modal (long press) --
+let _qbtnContextIdx = null;
+
+function openQbtnContext(idx) {
+  _qbtnContextIdx = idx;
+  const qb = quickButtons[idx];
+  const titleEl     = document.getElementById('qctx-title');
+  const removeBtnEl = document.getElementById('qctx-remove-btn');
+  const iconBtnEl   = document.getElementById('qctx-icon-btn');
+  const assigned    = qb.productId !== null;
+  if (assigned) {
+    const prod = products.find(p => p.id === qb.productId);
+    titleEl.textContent = prod ? prod.desc : 'Prodotto rimosso';
+    removeBtnEl.style.display = '';
+    iconBtnEl.style.display = '';
+  } else {
+    titleEl.textContent = 'Pulsante non assegnato';
+    removeBtnEl.style.display = 'none';
+    iconBtnEl.style.display = 'none';
+  }
+  document.getElementById('qbtn-context-modal').classList.add('open');
+}
+
+function closeQbtnContext() {
+  document.getElementById('qbtn-context-modal').classList.remove('open');
+  _qbtnContextIdx = null;
+}
+
+function qctxChange() {
+  const idx = _qbtnContextIdx;
+  closeQbtnContext();
+  openQbtnAssign(idx);
+}
+
+function qctxRemove() {
+  if (_qbtnContextIdx !== null) {
+    quickButtons[_qbtnContextIdx].productId = null;
+    saveQuickButtons();
+    renderSidebar();
+  }
+  closeQbtnContext();
+}
+
+function qctxDelete() {
+  if (_qbtnContextIdx !== null) {
+    quickButtons.splice(_qbtnContextIdx, 1);
+    saveQuickButtons();
+    renderSidebar();
+  }
+  closeQbtnContext();
+}
+
+document.getElementById('qbtn-assign-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeQbtnAssign();
+});
+document.getElementById('qbtn-context-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeQbtnContext();
+});
+document.getElementById('icon-picker-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeIconPicker();
+});
+
+// ── SELEZIONE ICONA ────────────────────────────────────────────────
+const QUICK_ICONS = [
+  // Strumenti
+  '🔧','🔨','⚙️','🛠️','🪛','🔩','🧰','🪚','✂️','🔌','🔋','🪝',
+  // Veicoli & carburante
+  '🚗','🚙','🛻','🏎️','🛞','⛽','🛢️','🚕','🚐','🏍️','🚑','🚒',
+  // Materiali & pulizia
+  '📦','🧹','🧽','💧','🪣','🧲','🧪','🪜','🛡️','💡','🔦','🪟',
+  // Servizi & documenti
+  '📋','📄','🧾','💳','💰','🔑','🗝️','📡','⚡','🖊️','📐','🏷️',
+  // Indicatori & simboli
+  '✅','⚠️','❌','⭐','🎯','🏆','🆘','🔴','🟡','🟢','🔵','🟠',
+];
+
+let _iconPickerIdx = null;
+
+function openIconPicker(idx) {
+  _iconPickerIdx = idx;
+  const current = quickButtons[idx]?.icon || null;
+  const grid = document.getElementById('icon-grid');
+  grid.innerHTML = QUICK_ICONS.map(icon => {
+    const sel = icon === current ? 'border-color:#3b82f6;background:#1e3a5f;' : '';
+    return `<button onclick="selectIcon('${icon}')"
+      style="font-size:22px;background:#0f172a;border:2px solid #1e3a5f;${sel}border-radius:8px;padding:4px;cursor:pointer;aspect-ratio:1;display:flex;align-items:center;justify-content:center;touch-action:manipulation"
+      >${icon}</button>`;
+  }).join('');
+  document.getElementById('icon-picker-modal').classList.add('open');
+}
+
+function closeIconPicker() {
+  document.getElementById('icon-picker-modal').classList.remove('open');
+  _iconPickerIdx = null;
+}
+
+function selectIcon(icon) {
+  if (_iconPickerIdx !== null) {
+    quickButtons[_iconPickerIdx].icon = icon;
+    saveQuickButtons();
+    renderSidebar();
+  }
+  closeIconPicker();
+}
+
+function qctxIcon() {
+  const idx = _qbtnContextIdx;
+  closeQbtnContext();
+  openIconPicker(idx);
+}
+
+// ── DISTINTA BASE ──────────────────────────────────────────────────
+function setProdType(type) {
+  _currentProdType = type;
+  document.getElementById('pf-tab-simple').classList.toggle('active', type === 'simple');
+  document.getElementById('pf-tab-bundle').classList.toggle('active', type === 'bundle');
+  document.getElementById('pf-price-row').style.display    = type === 'simple' ? '' : 'none';
+  document.getElementById('pf-bundle-section').style.display = type === 'bundle' ? '' : 'none';
+  if (type === 'bundle') renderBundleComps();
+}
+
+function searchBundleComp() {
+  const q = document.getElementById('pf-comp-search').value.trim().toLowerCase();
+  const dropdown = document.getElementById('pf-comp-dropdown');
+  if (!q) { dropdown.style.display = 'none'; return; }
+
+  const alreadyIn = new Set(_bundleComponents.map(c => c.productId));
+  const results = products
+    .filter(p => p.id !== _editingProdId &&
+      (p.desc + ' ' + (p.code || '')).toLowerCase().includes(q))
+    .slice(0, 8);
+
+  if (!results.length) { dropdown.style.display = 'none'; return; }
+
+  dropdown.innerHTML = results.map(p => {
+    const already = alreadyIn.has(p.id);
+    const typeTag = p.type === 'bundle' ? `<span style="font-size:10px;color:#c084fc;margin-right:4px">DB</span>` : '';
+    return `<div class="comp-dd-item${already ? ' already' : ''}" ${already ? '' : `onclick="addBundleComp(${p.id})"`}>
+      <span>${typeTag}${p.code ? `<span style="color:#4b6a9a;font-size:10px;font-family:monospace">${esc(p.code)} </span>` : ''}${esc(p.desc)}${already ? ' <span style="color:#64748b;font-size:10px">(già inserito)</span>' : ''}</span>
+      <span style="font-family:monospace;font-size:12px;color:#60a5fa;flex-shrink:0">${money(p.price || 0)}</span>
+    </div>`;
+  }).join('');
+  dropdown.style.display = '';
+}
+
+function addBundleComp(productId) {
+  if (!_bundleComponents.find(c => c.productId === productId)) {
+    _bundleComponents.push({ productId, qty: 1 });
+  }
+  document.getElementById('pf-comp-search').value = '';
+  document.getElementById('pf-comp-dropdown').style.display = 'none';
+  renderBundleComps();
+}
+
+function removeBundleComp(productId) {
+  _bundleComponents = _bundleComponents.filter(c => c.productId !== productId);
+  renderBundleComps();
+}
+
+function updateBundleCompQty(productId, val) {
+  const comp = _bundleComponents.find(c => c.productId === productId);
+  if (comp) comp.qty = Math.max(1, parseInt(val) || 1);
+  renderBundleComps();
+}
+
+function getBundleTotal() {
+  return _bundleComponents.reduce((sum, c) => {
+    const prod = products.find(p => p.id === c.productId);
+    return sum + (prod ? (prod.price || 0) * c.qty : 0);
+  }, 0);
+}
+
+function renderBundleComps() {
+  const list = document.getElementById('pf-comp-list');
+  if (!_bundleComponents.length) {
+    list.innerHTML = '<div style="color:#2d4060;font-size:12px;padding:4px 0">Nessun componente — cerca e aggiungi articoli sopra</div>';
+  } else {
+    list.innerHTML = _bundleComponents.map(c => {
+      const prod = products.find(p => p.id === c.productId);
+      if (!prod) return '';
+      const subtotal = (prod.price || 0) * c.qty;
+      return `<div class="comp-item">
+        <span style="flex:1">${prod.code ? `<span style="color:#4b6a9a;font-size:10px;font-family:monospace">${esc(prod.code)} </span>` : ''}${esc(prod.desc)}</span>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <button class="comp-qty-btn" onclick="updateBundleCompQty(${c.productId},${c.qty - 1})">−</button>
+          <span class="comp-qty-val">${c.qty}</span>
+          <button class="comp-qty-btn" onclick="updateBundleCompQty(${c.productId},${c.qty + 1})">+</button>
+        </div>
+        <span style="font-family:monospace;font-size:11px;color:#64748b;min-width:58px;text-align:right">${money(subtotal)}</span>
+        <button onclick="removeBundleComp(${c.productId})" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:14px;padding:2px 4px;flex-shrink:0">✕</button>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('pf-bundle-total').textContent = money(getBundleTotal());
+}
+
+// chiudi dropdown componenti cliccando fuori
+document.getElementById('pf-comp-search').addEventListener('blur', () => {
+  setTimeout(() => { document.getElementById('pf-comp-dropdown').style.display = 'none'; }, 180);
+});
+
 // init
 render();
+renderSidebar();
 </script>
 </body>
 </html>
